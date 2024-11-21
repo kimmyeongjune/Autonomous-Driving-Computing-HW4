@@ -421,14 +421,12 @@ def estimate_motion_depth(match, kp1, kp2, k, depth1=None):
     image1_points = np.array(image1_points, dtype=np.float32)
     image2_points = np.array(image2_points, dtype=np.float32)
 
-    if len(object_points) > 0:
-        _, rvec, tvec, _ = cv2.solvePnPRansac(object_points, image2_points, k, None)
-        rmat, _ = cv2.Rodrigues(rvec)
-    else:
-        E, mask = cv2.findEssentialMat(image1_points, image2_points, k, method=cv2.RANSAC, prob=0.999, threshold=1.0)
-        _, rmat, tvec, _ = cv2.recoverPose(E, image1_points, image2_points, k)
+
+    _, rvec, tvec, _ = cv2.solvePnPRansac(object_points, image2_points, k, None)
+    rmat, _ = cv2.Rodrigues(rvec)
 
     return rmat, tvec, image1_points, image2_points
+
 i = 0
 match = matches[i]
 kp1 = kp_list[i]
@@ -484,15 +482,14 @@ def estimate_trajectory(estimate_motion, matches, kp_list, k, depth_maps=[]):
     """
     trajectory = [np.zeros((3, 1))]
     current_position = np.zeros((3, 1)) 
-    
+
     ### START CODE HERE ###
     for i in range(len(matches)):
-        rmat, tvec, im1_p, im2_p = estimate_motion_depth(matches[i], kp_list[i], kp_list[i+1], k, depth_maps[i])
-        current_position += tvec
-        n_position = np.dot(rmat, current_position)
+        rmat, tvec, im1_p, im2_p = estimate_motion(matches[i], kp_list[i], kp_list[i+1], k, depth_maps[i])
+        current_position = current_position + rmat @ tvec
         
-        trajectory.append(n_position)
-    
+        trajectory.append(current_position.copy())
+
     trajectory = np.hstack(trajectory)
         
         
@@ -501,7 +498,7 @@ def estimate_trajectory(estimate_motion, matches, kp_list, k, depth_maps=[]):
     return trajectory
 
 depth_maps = dataset_handler.depth_maps
-trajectory = estimate_trajectory(estimate_motion, matches, kp_list, k, depth_maps=depth_maps)
+trajectory = estimate_trajectory(estimate_motion_depth, matches, kp_list, k, depth_maps=depth_maps)
 
 i = 1
 print("Camera location in point {0} is: \n {1}\n".format(i, trajectory[:, [i]]))
@@ -522,7 +519,7 @@ if is_main_filtered_m:
 
     
 depth_maps = dataset_handler.depth_maps
-trajectory = estimate_trajectory(estimate_motion, matches, kp_list, k, depth_maps=depth_maps)
+trajectory = estimate_trajectory(estimate_motion_depth, matches, kp_list, k, depth_maps=depth_maps)
 
 print("Trajectory X:\n {0}".format(trajectory[0,:].reshape((1,-1))))
 print("Trajectory Y:\n {0}".format(trajectory[1,:].reshape((1,-1))))
