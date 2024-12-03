@@ -1,4 +1,4 @@
-ORB feature extracter, Brute force matcher를 사용하여, 52개의 image data에서 Essential matrix를 얻은 다음 R, t matrix로 분해하여 visual odometry를 하는 작업을 수행하였습니다. 실험은 sub에서 진행하였습니다.
+ORB feature extracter, Brute force matcher를 사용하여, 52개의 image data에서 Essential matrix를 얻은 다음 R, t matrix로 분해하여 visual odometry를 하는 작업을 수행하였습니다. 실험은 sub에서 진행하였습니다. 추가적인 data로 visual odometry도 진행해보겠습니다.
 
 ### gray scale image
 !["gray scale image"](https://github.com/kimmyeongjune/Autonomous-Driving-Computing-HW4/blob/main/gray_1.png)
